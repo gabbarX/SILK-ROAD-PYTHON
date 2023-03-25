@@ -15,8 +15,9 @@ def loggedUser(data):
     print("Select a option from below:")
     print("1. View products")
     print("2. View cart")
-    print("3. View orders")
-    print("4. Logout")
+    print("3. View my orders")
+    print("4. View my profile")
+    print("0. Logout")
 
 
 def loggedAdmin(data):
