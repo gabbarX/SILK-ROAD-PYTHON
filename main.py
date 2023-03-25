@@ -1,5 +1,13 @@
 import mysql.connector as sql
 
+def makesqlconnection():
+    return sql.connect(
+                    host="localhost",
+                    user="root",
+                    password="indian0660",
+                    database="online_store"
+                )
+
 def loggedUser(data):
     # print(data) [(105, 'bhuki123', 'bhuki@kutti.com', '4204204200', 'basti colony, gand nagri', None)]
     email = data[0][2]
@@ -23,12 +31,7 @@ def loggedAdmin(data):
     wc = int(input(">> "))
     if wc == 1:
         try:
-            conn = sql.connect(
-                host="localhost",
-                user="root",
-                password="indian0660",
-                database="online_store"
-            )
+            conn = makesqlconnection()
         except sql.Error as e:
             # Handle connection error
             print(f"Error connecting to the database: {e}")
@@ -58,12 +61,7 @@ def loggedAdmin(data):
     
     elif wc == 2:
         try:
-            conn = sql.connect(
-                host="localhost",
-                user="root",
-                password="indian0660",
-                database="online_store"
-            )
+            conn = makesqlconnection()
         except sql.Error as e:
             # Handle connection error
             print(f"Error connecting to the database: {e}")
@@ -100,12 +98,7 @@ def adminLogin():
 
     # Connect to the database
     try:
-        conn = sql.connect(
-            host="localhost",
-            user="root",
-            password="indian0660",
-            database="online_store"
-        )
+        conn = makesqlconnection()
     except sql.Error as e:
         # Handle connection error
         print(f"Error connecting to the database: {e}")
@@ -151,12 +144,7 @@ def userLogin():
             password = input()
             # Connect to the database
             try:
-                conn = sql.connect(
-                    host="localhost",
-                    user="root",
-                    password="indian0660",
-                    database="online_store"
-                )
+                conn = makesqlconnection()
             except sql.Error as e:
                 # Handle connection error
                 print(f"Error connecting to the database: {e}")
