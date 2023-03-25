@@ -1,12 +1,12 @@
 import mysql.connector as sql
+import maskpass
+
 
 def makesqlconnection():
     return sql.connect(
-                    host="localhost",
-                    user="root",
-                    password="indian0660",
-                    database="online_store"
-                )
+        host="localhost", user="root", password="indian0660", database="online_store"
+    )
+
 
 def loggedUser(data):
     # print(data) [(105, 'bhuki123', 'bhuki@kutti.com', '4204204200', 'basti colony, gand nagri', None)]
@@ -17,6 +17,7 @@ def loggedUser(data):
     print("2. View cart")
     print("3. View orders")
     print("4. Logout")
+
 
 def loggedAdmin(data):
     # print(data) [(1, 'admin', 'admin', 'admin')]
@@ -50,15 +51,15 @@ def loggedAdmin(data):
             # print(data)
             print("------------------------------------------------------------")
             for item in data:
-                print("PRODUCT: "+item[0])
-                print("SOLD UNITS: "+str(item[1]))
-                print("REVENUE GENERATED: "+str(item[2]))
+                print("PRODUCT: " + item[0])
+                print("SOLD UNITS: " + str(item[1]))
+                print("REVENUE GENERATED: " + str(item[2]))
                 print("------------------------------------------------------------")
 
         except sql.Error as e:
-        # Handle SQL error
+            # Handle SQL error
             print(f"Error executing SQL query: {e}")
-    
+
     elif wc == 2:
         try:
             conn = makesqlconnection()
@@ -80,21 +81,20 @@ def loggedAdmin(data):
             # print(data)
             print("------------------------------------------------------------")
             for item in data:
-                print("CATEGORY NAME: "+item[0])
-                print("REVENUE GENERATED: "+str(item[1]))
+                print("CATEGORY NAME: " + item[0])
+                print("REVENUE GENERATED: " + str(item[1]))
                 print("------------------------------------------------------------")
 
         except sql.Error as e:
-        # Handle SQL error
+            # Handle SQL error
             print(f"Error executing SQL query: {e}")
-    
 
 
 def adminLogin():
     print("Welcome to admin login!")
-    firstName=input("Enter your first name --> ")
-    lastName=input("Enter your last name --> ")
-    password=input("Enter your password --> ")
+    firstName = input("Enter your first name --> ")
+    lastName = input("Enter your last name --> ")
+    password = maskpass.askpass(mask="*")
 
     # Connect to the database
     try:
@@ -109,7 +109,7 @@ def adminLogin():
         # print(r)
         # Insert the data into the database
         query = "SELECT* from admin where First_Name=%s and Last_Name=%s and Admin_Password=%s;"
-        values = (firstName,lastName,password)
+        values = (firstName, lastName, password)
         cur.execute(query, values)
 
         # Fetch the data from the database
@@ -124,12 +124,12 @@ def adminLogin():
         else:
             print("Incorrect login details. Try again.")
     except sql.Error as e:
-            # Handle SQL error
-            print(f"Error executing SQL query: {e}")
+        # Handle SQL error
+        print(f"Error executing SQL query: {e}")
 
 
 def userLogin():
-    while(True):
+    while True:
         print("Welcome to silk road user login!")
         print("Select a option from below:")
         print("1. Login")
@@ -141,7 +141,7 @@ def userLogin():
             print("Enter your email id:")
             email = input()
             print("Enter your password:")
-            password = input()
+            password = maskpass.askpass(mask="*")
             # Connect to the database
             try:
                 conn = makesqlconnection()
@@ -155,7 +155,7 @@ def userLogin():
                 # print(r)
                 # Insert the data into the database
                 query = "SELECT* from customer where customer_emailid=%s and customer_psswd=%s;"
-                values = (email,password)
+                values = (email, password)
                 cur.execute(query, values)
 
                 # Fetch the data from the database
@@ -174,7 +174,7 @@ def userLogin():
             except sql.Error as e:
                 # Handle SQL error
                 print(f"Error executing SQL query: {e}")
-            
+
         elif wc == 2:
             print("Welcome to the registration screen")
             print("HAhaa")
@@ -183,7 +183,8 @@ def userLogin():
             print("Thank you for visiting us!")
             break
 
-if __name__=='__main__':
+
+if __name__ == "__main__":
 
     while True:
 
