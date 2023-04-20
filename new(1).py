@@ -15,26 +15,51 @@ def loggedUser(data):
     print("2. View cart")
     print("3. View my orders")
     print("4. View my profile")
-    print("0. Logout")
+    print("5. Logout")
     wc = int(input(">> "))
     if wc == 1:
         try:
             conn = makesqlconnection()
             cur = conn.cursor()
-            query = "SELECT product_name, product_qty , product_price , product_description , product_brand , product_avgRating FROM products GROUP BY product_id;"
+            query = "SELECT product_id , product_name, product_qty , product_price , product_description , product_brand , product_avgRating FROM products GROUP BY product_id;"
             cur.execute(query)
 
             # Fetch the data from the database
             data = cur.fetchall()
             print("------------------------------------------------------------")
             for item in data:
-                print("PRODUCT NAME: " + item[0])
-                print("QUANTITY: " + str(item[1]))
-                print("PRICE: " + str(item[2]))
-                print("DESCRIPTION: " + str(item[3]))
-                print("BRAND: " + str(item[4]))
-                print("AVERAGE RATING: " + str(item[5]))
+                print("PRODUCT ID: " + item[0])
+                print("PRODUCT NAME: " + item[1])
+                print("QUANTITY: " + str(item[2]))
+                print("PRICE: " + str(item[3]))
+                print("DESCRIPTION: " + str(item[4]))
+                print("BRAND: " + str(item[5]))
+                print("AVERAGE RATING: " + str(item[6]))
                 print("------------------------------------------------------------")
+                print("\n")
+
+            print("------------------------------------------------------------")
+            print("1.Add product to cart")
+            print("2. Exit")
+
+            ww = int(input(">> "))
+            if ww == 1:
+                # try:
+                #     product_id = int(input("Enter the product ID to add to cart: "))
+                #     quantity = int(input("Enter the quantity: "))
+                #     query = f"INSERT INTO cart (total_items, total_amount, quantity) VALUES ({data[0][0]}, {product_id}, {quantity});"
+                #     cur.execute(query)
+                #     conn.commit()
+                #     print("Product added to cart successfully!")
+                # except ValueError:
+                #     print("Invalid input! Please enter a valid integer.")
+                # except sql.Error as e:
+                #     conn.rollback()
+                #     print(f"Error executing SQL query: {e}")
+                pass
+
+            elif ww==2 :
+                pass
 
         except sql.Error as e:
             # Handle SQL error
@@ -119,6 +144,8 @@ def loggedUser(data):
         # finally:
         #     cur.close()
         #     conn.close()
+        if wc==5:
+            pass
 
 
 
@@ -321,14 +348,46 @@ def userLogin():
                     loggedUser(data)
                 else:
                     print("Incorrect login details. Try again.")
-                    
+
             except sql.Error as e:
                 # Handle SQL error
                 print(f"Error executing SQL query: {e}")
 
         elif wc == 2:
             print("Welcome to the registration screen")
-            print("HAhaa")
+
+            customer_id = input("Enter your ID: ")
+            customer_emailid = input("Enter your email ID: ")
+            customer_psswd = input("Enter your password: ")
+            customer_phoneNumber = input("Enter your phone number: ")
+            customer_address = input("Enter your address: ")
+            
+            # Connect to the database
+            try:
+                conn = makesqlconnection()
+            except sql.Error as e:
+                # Handle connection error
+                print(f"Error connecting to the database: {e}")
+
+            try:
+                cur = conn.cursor()
+                # Insert the data into the database
+                query = "INSERT INTO customer (customer_id, customer_psswd, customer_emailid, customer_phoneNumber, customer_address) VALUES (%s, %s, %s, %s, %s);"
+                values = (customer_id, customer_psswd, customer_emailid, customer_phoneNumber, customer_address)
+                cur.execute(query, values)
+
+                # Commit the transaction
+                conn.commit()
+
+                # close the connection
+                cur.close()
+                conn.close()
+
+                print("Registration successful.")
+
+            except sql.Error as e:
+                # Handle SQL error
+                print(f"Error executing SQL query: {e}")
 
         elif wc == 3:
             print("Thank you for visiting us!")
