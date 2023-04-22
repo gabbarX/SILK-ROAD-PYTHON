@@ -1,3 +1,4 @@
+import datetime
 import mysql.connector as sql
 import maskpass
 
@@ -58,10 +59,10 @@ def loggedUser(data):
                             f"SELECT product_qty FROM products WHERE product_id = {product_id};"
                         )
                         result = cur.fetchone()
+                        print(result)
                         availableQty = result[0]
                         if availableQty < quantity:
                             print("Sorry, we don't have enough stock")
-                            continue
                         else:
                             cur.execute(
                                 f"UPDATE products SET product_qty = product_qty - {quantity} WHERE product_id = {product_id};"
@@ -83,7 +84,7 @@ def loggedUser(data):
                             result = cur.fetchone()
                             product_price = result[0]
                             cur.execute(
-                                f"UPDATE cart SET total_items = {total_items+quantity}, total_amount = {total_price+quantity*product_price} WHERE cart_id = 1;"
+                                f"UPDATE cart SET total_items = {total_items+quantity}, total_amount = {total_price+quantity*product_price} WHERE cart_id = {logginId};"
                             )
                             conn.commit()
                         print("Product added to cart successfully!")
@@ -126,106 +127,12 @@ def loggedUser(data):
                     print("2. Go Back")
                     wd = int(input(">> "))
                     if wd == 1:
-                        # Update the order status in the orders table to "Dispatched"
-                        query = f"UPDATE orders SET order_status = 'Dispatched' WHERE order_id = '{cart_id}';"
-                        cur.execute(query)
-                        conn.commit()
-                        print("Order has been Dispatched")
-
-                        # Update the order_id in delivery_partner table to the value stored in cart_id for the first row with a NULL order_id
-                        query = f"UPDATE delivery_partner SET order_id = '{cart_id}' WHERE order_id IS NULL LIMIT 1;"
-                        cur.execute(query)
-                        conn.commit()
-
-                    elif wd == 2:
-                        break
-                    else:
-                        print("Invalid input. Please enter 1 or 2")
-
-                    query = f"SELECT offer.offer_id, offer.promo_code, offer.max_discount, offer.min_amount FROM cart LEFT JOIN offer ON cart.offer_id = offer.offer_id WHERE cart.cart_id = {cart_id};"
-                    cur.execute(query)
-                    offer = cur.fetchone()
-                    print("\n")
-                    # print(offer)
-                    if offer[0] != None:
-                        print(
-                            "------------------------------------------------------------"
-                        )
-                        print("Offer Applied!")
-                        print(
-                            "------------------------------------------------------------"
-                        )
-                        print("Offer ID: " + str(offer[0]))
-                        print("Promo Code: " + str(offer[1]))
-                        print("Min Amount: " + str(offer[2]))
-                        print("Discount: " + str(offer[3]))
-                        print(
-                            "------------------------------------------------------------"
-                        )
-                        minAmount = offer[2]
-                        discount = offer[3]
-                        totalAmount = data[2]
-                        if totalAmount >= minAmount:
-                            totalAmount = totalAmount - discount
-                            print("Total Amount after discount: " + str(totalAmount))
-                            query = f"UPDATE cart SET total_amount = {totalAmount} WHERE cart_id = {cart_id};"
-                            cur.execute(query)
-                            conn.commit()
-                        else:
-                            print(
-                                f"Add {minAmount- totalAmount} worth of items to apply the offer for a discount of {offer[3]}"
-                            )
-                    else:
-                        print("Your cart currently has no promo-codes applied.")
-                        print("Do you want to apply promo-code? (Y/N)")
-                        applyOffer = input(">> ")
-                        if applyOffer == "Y" or "y":
-                            offerId = input("Enter the promo-code to apply the offer: ")
-                            query = f"SELECT offer_id, promo_code, max_discount, min_amount FROM offer WHERE promo_code = '{offerId}';"
-                            cur.execute(query)
-                            offer = cur.fetchone()
-                            print(offer)
-                            if offer:
-                                print(
-                                    "------------------------------------------------------------"
-                                )
-                                print("Offer Applied!")
-                                print(
-                                    "------------------------------------------------------------"
-                                )
-                                print("Offer ID: " + str(offer[0]))
-                                print("Promo Code: " + str(offer[1]))
-                                print("Min Amount: " + str(offer[2]))
-                                print("Discount: " + str(offer[3]))
-                                print(
-                                    "------------------------------------------------------------"
-                                )
-                                minAmount = offer[2]
-                                discount = offer[3]
-                                totalAmount = data[2]
-                                if totalAmount >= minAmount:
-                                    totalAmount = totalAmount - discount
-                                    print(
-                                        "Total Amount after discount: "
-                                        + str(totalAmount)
-                                    )
-                                    query = f"UPDATE cart SET total_amount = {totalAmount}, offer_id = {offer[0]} WHERE cart_id = {cart_id};"
-                                    cur.execute(query)
-                                    conn.commit()
-                                else:
-                                    print(
-                                        f"Add {minAmount- totalAmount} worth of items to apply the offer for a discount of {offer[3]}"
-                                    )
-                            else:
-                                print("Invalid promo-code!")
-                        else:
-                            print("Okay, no problem!")
-
-                        query = f"SELECT offer_id, promo_code, max_discount, min_amount FROM offer WHERE promo_code = '{offerId}';"
+                        query = f"SELECT offer.offer_id, offer.promo_code, offer.max_discount, offer.min_amount FROM cart LEFT JOIN offer ON cart.offer_id = offer.offer_id WHERE cart.cart_id = {cart_id};"
                         cur.execute(query)
                         offer = cur.fetchone()
-                        print(offer)
-                        if offer:
+                        print("\n")
+                        # print(offer)
+                        if offer[0] != None:
                             print(
                                 "------------------------------------------------------------"
                             )
@@ -243,7 +150,7 @@ def loggedUser(data):
                             minAmount = offer[2]
                             discount = offer[3]
                             totalAmount = data[2]
-                            if totalAmount > minAmount:
+                            if totalAmount >= minAmount:
                                 totalAmount = totalAmount - discount
                                 print(
                                     "Total Amount after discount: " + str(totalAmount)
@@ -256,7 +163,83 @@ def loggedUser(data):
                                     f"Add {minAmount- totalAmount} worth of items to apply the offer for a discount of {offer[3]}"
                                 )
                         else:
-                            print("Invalid promo-code.")
+                            print("Your cart currently has no promo-codes applied.")
+                            print("Do you want to apply promo-code? (Y/N)")
+                            applyOffer = input(">> ")
+                            if applyOffer == ("Y" or "y"):
+                                offerId = input(
+                                    "Enter the promo-code to apply the offer: "
+                                )
+                                query = f"SELECT offer_id, promo_code, max_discount, min_amount FROM offer WHERE promo_code = '{offerId}';"
+                                cur.execute(query)
+                                offer = cur.fetchone()
+                                # print(offer)
+                                if offer[0]:
+                                    print(
+                                        "------------------------------------------------------------"
+                                    )
+                                    print("Offer Applied!")
+                                    print(
+                                        "------------------------------------------------------------"
+                                    )
+                                    print("Offer ID: " + str(offer[0]))
+                                    print("Promo Code: " + str(offer[1]))
+                                    print("Min Amount: " + str(offer[2]))
+                                    print("Discount: " + str(offer[3]))
+                                    print(
+                                        "------------------------------------------------------------"
+                                    )
+                                    minAmount = offer[2]
+                                    discount = offer[3]
+                                    totalAmount = data[2]
+                                    if totalAmount >= minAmount:
+                                        totalAmount = totalAmount - discount
+                                        print(
+                                            "Total Amount after discount: "
+                                            + str(totalAmount)
+                                        )
+                                        query = f"UPDATE cart SET total_amount = {totalAmount}, offer_id = {offer[0]} WHERE cart_id = {cart_id};"
+                                        cur.execute(query)
+                                        conn.commit()
+                                    else:
+                                        print(
+                                            f"Add {minAmount- totalAmount} worth of items to apply the offer for a discount of {offer[3]}"
+                                        )
+                                else:
+                                    print("Invalid promo-code!")
+                            else:
+                                print("Okay, no problem!")
+
+                        # Update the order status in the orders table to "Dispatched"
+                        paymentMode = input("Enter your preffered payment mode: ")
+                        paymentDateTime = datetime.datetime.now().strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+
+                        # query = f"INSERT INTO payment (offer_id,payment_time_date,payment_mode,payment_details,order_id) VALUES ({paymentDateTime},{paymentMode},'Approved',{cart_id});"
+                        # cur.execute(query)
+                        # print("Your payment has been processed.")
+
+                        # clear the cart
+                        query = f"UPDATE cart SET total_items = 0, total_amount = 0, offer_id = NULL WHERE cart_id = {cart_id};"
+                        cur.execute(query)
+                        print("Your cart has been cleared.")
+
+                        query = f"UPDATE orders SET order_status = 'Dispatched' WHERE order_id = {cart_id};"
+                        cur.execute(query)
+                        print("Your order has been dispatched.")
+
+                        query = f"UPDATE delivery_partner SET order_id = '{cart_id}' WHERE order_id IS NULL LIMIT 1;"
+                        cur.execute(query)
+
+                        query = f"INSERT INTO orders (order_id, order_time_date, order_status, customer_id, payment_id, partner_id) VALUES ({logginId}, '2023-04-22', 'Processing', {logginId}, {logginId},75);"
+                        cur.execute(query)
+                        conn.commit()
+
+                    elif wd == 2:
+                        break
+                    else:
+                        print("Invalid input. Please enter 1 or 2")
 
                 else:
                     print("No data found for the given cart ID")
@@ -523,10 +506,12 @@ def userLogin():
             try:
                 cur = conn.cursor()
                 # Insert the data into the database
-                cur.execute(f"INSERT INTO cart (total_items) VALUES (0);")
                 cur.execute("SELECT* FROM customer;")
                 data = cur.fetchall()
                 customer_id = len(data) + 1 + 3
+                cur.execute(
+                    f"INSERT INTO cart (cart_id,total_items) VALUES ({customer_id},0);"
+                )
                 query = "INSERT INTO customer (customer_id,customer_psswd, customer_emailid, customer_phoneNumber, customer_address, cart_id) VALUES (%s, %s, %s, %s, %s,%s);"
                 values = (
                     customer_id,
