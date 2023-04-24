@@ -288,7 +288,6 @@ def loggedUser(data):
                             "------------------------------------------------------------"
                         )
 
-                    # Fetch the payment details from the payment table for the same order_id
                     query = f"SELECT * FROM payment JOIN `orders` ON payment.payment_id = `orders`.payment_id WHERE orders.order_id = {order_id};"
                     cur.execute(query)
                     temp = cur.fetchone()
@@ -407,6 +406,33 @@ def loggedAdmin(data):
             for item in data:
                 print("CATEGORY NAME: " + item[0])
                 print("REVENUE GENERATED: " + str(item[1]))
+                print("------------------------------------------------------------")
+
+        except sql.Error as e:
+            # Handle SQL error
+            print(f"Error executing SQL query: {e}")
+
+    elif wc == 3:
+        try:
+            conn = makesqlconnection()
+        except sql.Error as e:
+            # Handle connection error
+            print(f"Error connecting to the database: {e}")
+
+        try:
+            ID = int(input())
+            cur = conn.cursor()
+            query = f"SELECT * FROM customer WHERE customer_id = {ID};"
+            cur.execute(query)
+
+            # Fetch the data from the database
+            data = cur.fetchall()
+            print("------------------------------------------------------------")
+            for item in data:
+                print("CUSTOMER ID: " + str(item[0]))
+                print("CUSTOMER EMAIL: " + item[2])
+                print("CUSTOMER PHONE: " + str(item[3]))
+                print("CUSTOMER ADDRESS: " + item[4])
                 print("------------------------------------------------------------")
 
         except sql.Error as e:
