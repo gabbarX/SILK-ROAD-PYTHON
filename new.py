@@ -210,6 +210,8 @@ def loggedUser(data):
                             else:
                                 print("Okay, no problem!")
 
+                                
+
                         paymentMode = input("Enter your preferred payment mode: ")
                         paymentDateTime = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
