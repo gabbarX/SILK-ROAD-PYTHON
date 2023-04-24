@@ -230,10 +230,23 @@ def loggedUser(data):
                         # conn.commit()
                         # print("Your order has been dispatched.")
 
-                        query = f"UPDATE orders SET order_status = 'Dispatched' WHERE order_id = {cart_id};"
-                        cur.execute(query)
-                        conn.commit()
-                        print("Your order has been dispatched.")
+                        # query = f"UPDATE orders SET order_status = 'Dispatched' WHERE order_id = {cart_id};"
+                        # cur.execute(query)
+                        # conn.commit()
+                        # print("Your order has been dispatched.")
+
+                        # Insert order details into orders table
+                        if cart_id is not None:
+                            query = f"UPDATE orders SET order_status = 'Dispatched' WHERE order_id = {cart_id};"
+                            cur.execute(query)
+                            conn.commit()
+                            print("Your order has been dispatched.")
+                        else:
+                            query = f"INSERT INTO orders (order_time_date, order_status, customer_id, payment_id, partner_id) VALUES ('{paymentDateTime}', 'Dispatched', {cart_id}, {cart_id},{cart_id});"
+                            cur.execute(query)
+                            conn.commit()
+                            print("Your order has been dispatched.")
+
 
                         # Update delivery partner table with order details
                         query = f"UPDATE delivery_partner SET order_id = '{cart_id}' WHERE order_id IS NULL LIMIT 1;"
