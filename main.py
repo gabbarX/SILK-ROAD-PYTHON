@@ -216,9 +216,10 @@ def loggedUser(data):
                             "%Y-%m-%d %H:%M:%S"
                         )
 
-                        # query = f"INSERT INTO payment (offer_id,payment_time_date,payment_mode,payment_details,order_id) VALUES ({paymentDateTime},{paymentMode},'Approved',{cart_id});"
-                        # cur.execute(query)
-                        # print("Your payment has been processed.")
+                        query = f"INSERT INTO payment (payment_id,payment_time_date,payment_mode,payment_details) VALUES ('{cart_id}','{paymentDateTime}','{paymentMode}','Approved');"
+                        cur.execute(query)
+                        conn.commit()
+                        print("Your payment has been processed.")
 
                         # clear the cart
                         query = f"UPDATE cart SET total_items = 0, total_amount = 0, offer_id = NULL WHERE cart_id = {cart_id};"
@@ -229,10 +230,10 @@ def loggedUser(data):
                         cur.execute(query)
                         print("Your order has been dispatched.")
 
-                        query = f"UPDATE delivery_partner SET order_id = '{cart_id}' WHERE order_id IS NULL LIMIT 1;"
+                        query = f"INSERT INTO orders (order_id,order_time_date, order_status, customer_id, payment_id, partner_id) VALUES ({cart_id},'2023-04-22', 'Processing', {cart_id}, {cart_id},75);"
                         cur.execute(query)
 
-                        query = f"INSERT INTO orders (order_id, order_time_date, order_status, customer_id, payment_id, partner_id) VALUES ({logginId}, '2023-04-22', 'Processing', {logginId}, {logginId},75);"
+                        query = f"UPDATE delivery_partner SET order_id = {cart_id} WHERE order_id IS NULL LIMIT 1;"
                         cur.execute(query)
                         conn.commit()
 
@@ -250,7 +251,7 @@ def loggedUser(data):
                 conn = makesqlconnection()
                 cur = conn.cursor()
                 order_id = logginId
-                query = f"SELECT order_id, order_status, customer_id FROM orders WHERE order_id = '{order_id}' GROUP BY order_id;"
+                query = f"SELECT order_id, order_status, customer_id FROM orders WHERE order_id = {order_id} GROUP BY order_id;"
                 cur.execute(query)
 
                 data = cur.fetchone()
@@ -261,28 +262,92 @@ def loggedUser(data):
                     print("Order ID: " + str(data[0]))
                     print("Order Status: " + str(data[1]))
                     print("Customer ID: " + str(data[2]))
-                    print("Delivery Partner ID: " + str(data[0]))
-                    print("Delivery Partner Name: ")
 
-                    # Fetch delivery partner name from the delivery_partner table for the same order_id
-                    query = f"SELECT dp.partner_name FROM delivery_partner dp JOIN orders o ON dp.order_id = o.order_id WHERE dp.order_id = '{order_id}'"
+                    # trying to assign delivery partner if not already
+                    query = f"UPDATE delivery_partner SET order_id = {order_id} WHERE order_id IS NULL LIMIT 1;"
                     cur.execute(query)
-                    dp_name = cur.fetchone()[
-                        0
-                    ]  # Fetch the first column of the first row
+                    conn.commit()
+                    # Fetch delivery partner name from the delivery_partner table for the same order_id
+                    query = f"SELECT dp.partner_name,partner_description,partner_rating FROM delivery_partner dp JOIN orders o ON dp.order_id = o.order_id WHERE dp.order_id = '{order_id}'"
+                    cur.execute(query)
+                    temp = cur.fetchone()
+                    if temp == None:
+                        print("No delivery partner assigned yet.")
+                        print("All delivery partners are busy.")
+                        print(
+                            "Please wait a moment before we can find a delivery partner for you"
+                        )
 
-                    print(dp_name)
-                    print(
-                        "------------------------------------------------------------"
-                    )
+                    else:
+                        # print(temp)
+                        dp_name = temp[0]
+                        print("Delivery Partner Name: ", dp_name)
+                        print("Delivery Partner Description: ", temp[1])
+                        print("Delivery Partner rating: ", temp[2])
+                        print(
+                            "------------------------------------------------------------"
+                        )
+
+                    # Fetch the payment details from the payment table for the same order_id
+                    query = f"SELECT * FROM payment JOIN `orders` ON payment.payment_id = `orders`.payment_id WHERE orders.order_id = {order_id};"
+                    cur.execute(query)
+                    temp = cur.fetchone()
+                    if temp == None:
+                        print("No payment details found.")
+                    else:
+                        print("Payment ID: ", temp[0])
+                        print("Payment Time: ", temp[1])
+                        print("Payment Mode: ", temp[2])
+                        print("Payment Details: ", temp[3])
+                        print(
+                            "------------------------------------------------------------"
+                        )
                 else:
                     print("No data found for the given cart ID")
 
             except sql.Error as e:
                 print(f"Error executing SQL query: {e}")
         if wc == 4:
-            print(data)
+            conn = makesqlconnection()
+            cur = conn.cursor()
+            # print(data)
+            print("Welcome to the silk road online store, " + data[0][1])
+            print("Your current status: User")
+            print("Your email id is: ", data[0][1])
+            print("Your phone number is: ", data[0][3])
+            print("Your address is :", data[0][4])
 
+            print("Do you want to update any of the details?")
+            ch = input("y/n >> ")
+            if ch == "y":
+                print("1. Update email id")
+                print("2. Update phone number")
+                print("3. Update address")
+                print("4. Update password")
+                chh = int(input())
+                if chh == 1:
+                    newEmail = input("Enter the new email: ")
+                    query = f"UPDATE customer SET customer_emailid = '{newEmail}' WHERE customer_id = {logginId};"
+                    cur.execute(query)
+                    conn.commit()
+                    print("Email id updated successfully!")
+                elif chh == 2:
+                    newPhone = input("Enter the new Phone Number: ")
+                    query = f"UPDATE customer SET customer_emailid = '{newPhone}' WHERE customer_id = {logginId};"
+                    cur.execute(query)
+                    conn.commit()
+                    print("Phone number updated successfully!")
+                elif chh == 3:
+                    newAdd = input("Enter the new Address: ")
+                    query = f"UPDATE customer SET customer_address = '{newAdd}' WHERE customer_id = {logginId};"
+                    cur.execute(query)
+                    conn.commit()
+                    print("Address updated successfully!")
+                elif chh == 4:
+                    newPass = input("Enter the new password: ")
+                    query = f"UPDATE customer SET customer_psswd = '{newPass}' WHERE customer_id = {logginId};"
+                    cur.execute(query)
+                    conn.commit()
         if wc == 5:
             break
 
@@ -297,6 +362,7 @@ def loggedAdmin(data):
     print("3. View customer details.")
     print("4. Add category.")
     print("5. Add product.")
+    print("6. Add a new delivery partner.")
     wc = int(input(">> "))
     if wc == 1:
         try:
@@ -397,6 +463,29 @@ def loggedAdmin(data):
             conn.commit()
 
             print("Product added successfully.")
+
+        except sql.Error as e:
+            # Handle SQL error
+            print(f"Error executing SQL query: {e}")
+
+    elif wc == 6:
+        try:
+            conn = makesqlconnection()
+        except sql.Error as e:
+            # Handle connection error
+            print(f"Error connecting to the database: {e}")
+
+        try:
+            cur = conn.cursor()
+
+            print("Please enter the following details to add a delivery partner:")
+            partnerName = input("Enter the delivery partner name :")
+            partnerEmail = input("Enter the delivery partner email :")
+            partnerDescription = input("Enter the delivery partner description :")
+            query = "INSERT INTO delivery_partner(partner_name, partner_email, partner_description) values (%s,%s,%s);"
+            values = (partnerName, partnerEmail, partnerDescription)
+            cur.execute(query, values)
+            conn.commit()
 
         except sql.Error as e:
             # Handle SQL error
