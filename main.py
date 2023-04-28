@@ -310,7 +310,7 @@ def loggedUser(data):
             conn = makesqlconnection()
             cur = conn.cursor()
             # print(data)
-            print("Welcome to the silk road online store, " + data[0][1])
+            print("Welcome to the silk road online store, ", data[0][1])
             print("Your current status: User")
             print("Your email id is: ", data[0][1])
             print("Your phone number is: ", data[0][3])
@@ -420,7 +420,7 @@ def loggedAdmin(data):
             print(f"Error connecting to the database: {e}")
 
         try:
-            ID = int(input())
+            ID = int(input("Enter the id of the customer: "))
             cur = conn.cursor()
             query = f"SELECT * FROM customer WHERE customer_id = {ID};"
             cur.execute(query)
