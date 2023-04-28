@@ -166,7 +166,7 @@ def loggedUser(data):
                             print("Your cart currently has no promo-codes applied.")
                             print("Do you want to apply promo-code? (Y/N)")
                             applyOffer = input(">> ")
-                            if applyOffer == ("Y" or "y"):
+                            if applyOffer == "y":
                                 offerId = input(
                                     "Enter the promo-code to apply the offer: "
                                 )
